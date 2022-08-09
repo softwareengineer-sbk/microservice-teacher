@@ -3,6 +3,7 @@ package self.training.app.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,12 +37,18 @@ public class TeacherController {
     }
 
     @GetMapping(value = "/withStudents/{id}", produces = MediaType.APPLICATION_JSON)
+//    @CircuitBreaker(name = "getTeacherWithStudents", fallbackMethod = "getTeacherWithStudentsFallback")
+//    @Retry(name = "getTeacherWithStudents", fallbackMethod = "getTeacherWithStudentsFallback")
+    @RateLimiter(name = "getTeacherWithStudents", fallbackMethod = "getTeacherWithStudentsFallback")
     public TeacherWithStudents getTeacherWithStudents(@PathVariable int id){
         log.info("Controller method: getTeacherWithStudents");
         return teacherService.getTeacherWithStudents(id);
     }
 
     @GetMapping(value = "/withPayments/{id}", produces = MediaType.APPLICATION_JSON)
+//    @CircuitBreaker(name = "getTeacherWithPayments", fallbackMethod = "getTeacherWithPaymentsFallback")
+//    @Retry(name = "getTeacherWithPayments", fallbackMethod = "getTeacherWithPaymentsFallback")
+    @RateLimiter(name = "getTeacherWithPayments", fallbackMethod = "getTeacherWithPaymentsFallback")
     public TeacherWithPayments getTeacherWithPayments(@PathVariable int id){
         log.info("Controller method: getTeacherWithPayments");
         return teacherService.getTeacherWithPayments(id);
@@ -52,5 +59,15 @@ public class TeacherController {
         ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
         Properties properties = new Properties(serverConfiguration.getMsg(), serverConfiguration.getBuildVersion(), serverConfiguration.getMailDetails());
         return ow.writeValueAsString(properties);
+    }
+
+    private TeacherWithStudents getTeacherWithStudentsFallback(int id, Throwable throwable){
+        System.out.println("This is a fallback method");
+        return new TeacherWithStudents();
+    }
+
+    private TeacherWithPayments getTeacherWithPaymentsFallback(int id, Throwable throwable){
+        System.out.println("This is a fallback method");
+        return new TeacherWithPayments();
     }
 }
