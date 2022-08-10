@@ -54,10 +54,10 @@ public class TeacherServiceImpl implements TeacherService{
     @Override
     public TeacherWithPayments getTeacherWithPayments(int id) {
         log.info("Service method: getTeacherWithPayments");
-        Payment payment = paymentFeignClient.getPaymentsWithTeacherId(id);
         Optional<TeacherDBO> teacherDBO = teacherRepository.findById(id);
         TeacherWithPayments teacherWithPayments = new TeacherWithPayments();
         if (teacherDBO.isPresent()){
+            Payment payment = paymentFeignClient.getPaymentsWithTeacherId(id);
             teacherWithPayments.setPayment(payment);
             teacherWithPayments.setName(teacherDBO.get().getName());
             teacherWithPayments.setSubject(teacherDBO.get().getSubject());
