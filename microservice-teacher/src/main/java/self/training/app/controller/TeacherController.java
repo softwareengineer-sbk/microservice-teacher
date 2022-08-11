@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +33,7 @@ public class TeacherController {
     }
 
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON)
+    @Timed(value = "getById.time", description = "Time taken to return teacher object by id")
     public Teacher getById(@PathVariable int id){
         return teacherService.getById(id);
     }
